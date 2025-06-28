@@ -1,0 +1,41 @@
+{# blood_pressure_python_2/users/templates/base.html #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blood Pressure Tracker{% endblock %}</title>
+     {% load static %} {# <-- Add this line to load static files #}
+    <link rel="stylesheet" href="{% static 'users/styles.css' %}"> {# <-- Link to your CSS file #}
+
+</head>
+<body>
+    <nav class="navbar">
+        <div>
+            <a href="{% url 'home' %}">Blood Pressure Tracker</a>
+        </div>
+        <div>
+            {% if user.is_authenticated %}
+                <span>Hello, {{ user.email }}!</span>
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'signup' %}">Sign Up</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

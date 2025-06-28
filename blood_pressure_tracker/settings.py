@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     'users.apps.UsersConfig',
 ]
 
@@ -55,7 +56,7 @@ ROOT_URLCONF = 'blood_pressure_tracker.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'users' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -124,3 +125,11 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+SITE_ID = 1
+
+# Email settings for development 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Prints emails to console 
+# OR for saving to a file (more useful if you want to inspect HTML emails): 
+# EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend' 
+# EMAIL_FILE_PATH = BASE_DIR / 'sent_emails' # Make sure this directory exists!

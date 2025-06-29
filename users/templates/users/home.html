@@ -8,7 +8,7 @@
     {% if user.is_authenticated %}
         <p>You are logged in as {{ user.email }}.</p>
         <p>You can now start tracking your blood pressure.</p>
-        <p><a href="#">Go to your Dashboard</a></p> {# Placeholder for future dashboard #}
+        <p><a href="{% url 'dashboard' %}">Go to your Dashboard</a></p>
     {% else %}
         <p>Please <a href="{% url 'login' %}">log in</a> or <a href="{% url 'signup' %}">sign up</a> to start tracking your blood pressure.</p>
     {% endif %}

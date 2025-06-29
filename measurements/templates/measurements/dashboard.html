@@ -1,0 +1,64 @@
+{# blood_pressure_python_2/measurements/templates/measurements/dashboard.html #}
+{% extends 'base.html' %}
+{% load static %} {# Need this if you plan to use static files here later #}
+
+{% block title %}Your Dashboard - Blood Pressure Tracker{% endblock %}
+
+{% block content %}
+    <h1>Your Blood Pressure Dashboard</h1>
+
+    <p>Welcome, {{ user.email }}!</p>
+
+    <p>
+        <a href="{% url 'add_measurement' %}" class="button">Add New Measurement</a>
+    </p>
+
+    {% if measurements %}
+        <h2>Your Recent Measurements</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date/Time</th>
+                    <th>Systolic</th>
+                    <th>Diastolic</th>
+                    <th>Pulse</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for measurement in measurements %}
+                    <tr>
+                        <td>{{ measurement.timestamp|date:"M d, Y H:i" }}</td>
+                        <td>{{ measurement.systolic }}</td>
+                        <td>{{ measurement.diastolic }}</td>
+                        <td>{{ measurement.pulse }}</td>
+                        <td>{{ measurement.bp_category }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% comment %} Optional: Add pagination links if you enabled paginate_by in the view {% endcomment %}
+        {% if is_paginated %}
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                    {% endif %}
+
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        {% endif %}
+    {% else %}
+        <p>You haven't logged any blood pressure measurements yet.</p>
+        <p>Click "Add New Measurement" to get started!</p>
+    {% endif %}
+{% endblock %}

@@ -129,3 +129,46 @@ body {
 }
 
 /* end styles for password toggle */
+
+
+/* styles for dashboard */
+/* ... existing CSS ... */
+
+.button {
+    display: inline-block;
+    background-color: #007bff;
+    color: white;
+    padding: 0.8em 1.2em;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    text-decoration: none; /* For links */
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+.button:hover {
+    background-color: #0056b3;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+}
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+table th {
+    background-color: #f2f2f2;
+}
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* end styles for dashboard */

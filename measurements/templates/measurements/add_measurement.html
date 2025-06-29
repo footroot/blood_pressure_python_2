@@ -1,17 +1,21 @@
-{# blood_pressure_python_2/users/templates/users/login.html #}
+{# blood_pressure_python_2/measurements/templates/measurements/add_measurement.html #}
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Login - Blood Pressure Tracker{% endblock %}
+{% block title %}Add Measurement - Blood Pressure Tracker{% endblock %}
 
 {% block content %}
-    <h2>Login</h2>
+    <h2>Add New Blood Pressure Measurement</h2>
+
     <form method="post">
         {% csrf_token %}
         {% for field in form %}
             <div class="form-group">
                 {{ field.label_tag }}
                 {{ field }}
+                {% if field.help_text %}
+                    <small style="color: gray;">{{ field.help_text }}</small>
+                {% endif %}
                 {% for error in field.errors %}
                     <p class="errorlist">{{ error }}</p>
                 {% endfor %}
@@ -25,14 +29,8 @@
             </ul>
         {% endif %}
         <div class="form-group">
-            <button type="submit">Login</button>
+            <button type="submit">Save Measurement</button>
         </div>
     </form>
-    <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
-    <p><a href="{% url 'password_reset' %}">Forgot your password?</a></p> {# ADD THIS LINE #}
-
-{% endblock %}
-
-{% block extra_js %} {# Add this block #}
-    <script src="{% static 'users/js/password_toggle.js' %}"></script>
+    <p><a href="{% url 'dashboard' %}">Back to Dashboard</a></p>
 {% endblock %}

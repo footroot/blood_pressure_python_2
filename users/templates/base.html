@@ -1,4 +1,5 @@
 {# blood_pressure_python_2/users/templates/base.html #}
+{% load static %} {# Make sure this is at the very top of the file #}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,5 +38,7 @@
         {% block content %}
         {% endblock %}
     </div>
+    {% block extra_js %}
+    {% endblock %}
 </body>
 </html>

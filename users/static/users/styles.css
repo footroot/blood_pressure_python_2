@@ -91,3 +91,41 @@ body {
 }
 
 /* end styles for base.html */
+
+/* ... styles for password toggle ... */
+
+.form-group {
+    position: relative; /* To position the toggle button relative to the input */
+    margin-bottom: 1em; /* Ensure consistent spacing */
+}
+
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="text"] { /* Add input[type="text"] for consistency */
+    width: 100%;
+    padding: 0.8em;
+    /* No margin-bottom here, as we're handling it on .form-group now */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.password-toggle-button {
+    position: absolute;
+    right: 0.5em; /* Adjust as needed */
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #007bff; /* Match your primary button color */
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+    z-index: 1; /* Ensure it's above the input if layout gets tricky */
+}
+.password-toggle-button:hover {
+    background-color: #e0e0e0;
+}
+
+/* end styles for password toggle */

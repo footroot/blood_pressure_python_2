@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'users.apps.UsersConfig',
+    'measurements.apps.MeasurementsConfig', # Our new measurements app
 ]
 
 MIDDLEWARE = [

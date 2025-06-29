@@ -1,5 +1,6 @@
 {# blood_pressure_python_2/users/templates/users/login.html #}
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Login - Blood Pressure Tracker{% endblock %}
 
@@ -28,4 +29,8 @@
         </div>
     </form>
     <p>Don't have an account? <a href="{% url 'signup' %}">Sign Up</a></p>
+{% endblock %}
+
+{% block extra_js %} {# Add this block #}
+    <script src="{% static 'users/js/password_toggle.js' %}"></script>
 {% endblock %}

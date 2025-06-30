@@ -25,7 +25,7 @@ if 'in-v3.mailjet.com' in EMAIL_HOST:
     EMAIL_HOST_PASSWORD = '58591babf4845fa9fa0deb8bc4242ccb' # REPLACE THIS
 
 SENDER_EMAIL = "footroot@mytaller.info" # Can be anything unless your provider enforces it
-RECEIVER_EMAIL = "footroot@mytaller.info" # Send to an email you can check
+RECEIVER_EMAIL = "footroot.72@gmail.com" # Send to an email you can check
 
 print(f"Attempting to connect to SMTP server: {EMAIL_HOST}:{EMAIL_PORT}")
 print(f"User: {EMAIL_HOST_USER}")

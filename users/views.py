@@ -62,7 +62,15 @@ class SignUpView(CreateView):
         # IMPORTANT: For local development, send_mail will try to use your email settings.
         # If you don't have them set up, it will print to console.
         # In production, you MUST configure email settings in settings.py (EMAIL_BACKEND, etc.)
-        send_mail(subject, message, 'no-reply@yourdomain.com', [user.email])
+        print(f"DEBUG: Preparing to send verification email to {user.email}")
+        print(f"DEBUG: Subject: {subject}")
+        print(f"DEBUG: Message length: {len(message)}")
+        print(f"DEBUG: From email: 'no-reply@mytaller.info'") # Confirm this matches your verified Mailjet sender
+        print(f"DEBUG: Domain in link (for reset): {current_site.domain}") # Should be 127.0.0.1:8000
+
+        send_mail(subject, message, 'no-reply@mytaller.info', [user.email])
+
+        print(f"DEBUG: send_mail function called for {user.email}. Check Mailjet logs.")
 
         messages.success(
             self.request, 'Your account has been created! Please check your email to verify your account.')

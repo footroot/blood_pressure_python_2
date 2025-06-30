@@ -1,9 +1,10 @@
-# measurements/models.py
+# D:\blood_pressure\blood_pressure_python_2\measurements\models.py
 
 from django.db import models
 from django.conf import settings # To get the AUTH_USER_MODEL
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
+# from django.conf import settings # This import is redundant, already imported above
 
 class Measurement(models.Model):
     user = models.ForeignKey(
@@ -22,6 +23,14 @@ class Measurement(models.Model):
     pulse = models.IntegerField(
         validators=[MinValueValidator(30), MaxValueValidator(200)],
         help_text="Heart rate (beats per minute)"
+    )
+    # Add the new weight field here
+    weight = models.DecimalField(
+        max_digits=5,      # e.g., allows numbers up to 999.99 (3 digits before, 2 after)
+        decimal_places=2,  # Stores two decimal places
+        null=True,         # Allows the field to be NULL in the database
+        blank=True,        # Allows the field to be left empty in forms
+        help_text="Weight (e.g., kg or lbs. Please use consistent units, e.g., 75.50)"
     )
     # Using auto_now_add=True for creation time
     # This will automatically set the field to now when the object is first created.
@@ -46,7 +55,7 @@ class Measurement(models.Model):
             return "High Blood Pressure (Hypertension Stage 1)"
         elif (140 <= self.systolic) or (90 <= self.diastolic):
             return "High Blood Pressure (Hypertension Stage 2)"
-        elif (self.systolic > 180 and self.diastolic > 120):
+        elif (self.systolic > 180 and self.diastolic > 120): # Note: This condition might overlap. Consider ordering.
             return "Hypertensive Crisis"
         else:
             return "Uncategorized"

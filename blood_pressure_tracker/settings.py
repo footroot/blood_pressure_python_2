@@ -136,4 +136,4 @@ EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool) # Get from env,
 EMAIL_HOST_USER = config('EMAIL_HOST_USER') # Get from environment variable 
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD') # Get from environment variable 
 DEFAULT_FROM_EMAIL = 'footroot@mytaller.info' # The email address your users will see the email coming from 
-SERVER_EMAIL = 'errors@mytaller.info' # For error messages sent by Django (e.g., if DEBUG=False) 
+SERVER_EMAIL = 'mytaller.info' # For error messages sent by Django (e.g., if DEBUG=False) 

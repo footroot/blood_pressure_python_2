@@ -1,10 +1,9 @@
 # D:\blood_pressure\blood_pressure_python_2\measurements\models.py
 
 from django.db import models
-from django.conf import settings # To get the AUTH_USER_MODEL
+from django.conf import settings
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
-# from django.conf import settings # This import is redundant, already imported above
 
 class Measurement(models.Model):
     user = models.ForeignKey(
@@ -24,20 +23,25 @@ class Measurement(models.Model):
         validators=[MinValueValidator(30), MaxValueValidator(200)],
         help_text="Heart rate (beats per minute)"
     )
-    # Add the new weight field here
     weight = models.DecimalField(
-        max_digits=5,      # e.g., allows numbers up to 999.99 (3 digits before, 2 after)
-        decimal_places=2,  # Stores two decimal places
-        null=True,         # Allows the field to be NULL in the database
-        blank=True,        # Allows the field to be left empty in forms
-        help_text="Weight (e.g., kg or lbs. Please use consistent units, e.g., 75.50)"
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Weight (e.g., kg or lbs, specify units consistently)"
     )
-    # Using auto_now_add=True for creation time
-    # This will automatically set the field to now when the object is first created.
-    timestamp = models.DateTimeField(default=timezone.now) # Changed to default for manual entry flexibility
+    # Add the new height field here
+    height = models.DecimalField(
+        max_digits=4,      # e.g., 99.99 (for meters) or 999.9 (for cm)
+        decimal_places=2,  # e.g., allows two decimal places (e.g., 1.75 meters)
+        null=True,         # Allows the field to be NULL in the database
+        blank=True,        # Allows the field to be blank in forms
+        help_text="Height (e.g., in meters: 1.75 or in cm: 175.00)"
+    )
+    timestamp = models.DateTimeField(default=timezone.now)
 
     class Meta:
-        ordering = ['-timestamp'] # Order by newest measurements first
+        ordering = ['-timestamp']
         verbose_name = "Blood Pressure Measurement"
         verbose_name_plural = "Blood Pressure Measurements"
 
@@ -46,7 +50,6 @@ class Measurement(models.Model):
 
     @property
     def bp_category(self):
-        # This is a simple categorization. Real medical advice should be sought.
         if self.systolic < 120 and self.diastolic < 80:
             return "Normal"
         elif (120 <= self.systolic < 130) and self.diastolic < 80:
@@ -55,7 +58,25 @@ class Measurement(models.Model):
             return "High Blood Pressure (Hypertension Stage 1)"
         elif (140 <= self.systolic) or (90 <= self.diastolic):
             return "High Blood Pressure (Hypertension Stage 2)"
-        elif (self.systolic > 180 and self.diastolic > 120): # Note: This condition might overlap. Consider ordering.
+        elif (self.systolic > 180 and self.diastolic > 120):
             return "Hypertensive Crisis"
         else:
             return "Uncategorized"
+
+    # You can add a property here to calculate BMI later if height and weight are present
+    @property
+    def bmi(self):
+        if self.weight and self.height:
+            # Assuming weight in kg and height in meters for standard BMI calculation
+            # BMI = weight (kg) / (height (m))^2
+            # You might need to convert units if you're storing in lbs/cm
+            try:
+                # Ensure height is not zero to avoid division by zero
+                if float(self.height) > 0:
+                    # Convert Decimal to float for calculation precision
+                    return round(float(self.weight) / (float(self.height) ** 2), 2)
+                else:
+                    return None # Height cannot be zero
+            except (ValueError, TypeError):
+                return None # Handle cases where conversion fails
+        return None # Return None if weight or height is not available

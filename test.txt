@@ -1,16 +1,9 @@
-{% extends 'base.html' %}
-{% load static %}
-{% load widget_tweaks %}
-{% block title %}Add Measurement - Blood Pressure Tracker{% endblock %}
-
-{% block content %}
-    <h2 class="mb-4">Add New Blood Pressure Measurement</h2> {# Added Bootstrap margin #}
 
     <form method="post">
         {% csrf_token %}
         {% for field in form %}
             <div class="mb-3"> {# Changed from form-group to mb-3 for Bootstrap spacing #}
-                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field.label_tag|add_class:"form-label" }} {# Applied Bootstrap form-label class #}
                 {{ field|add_class:"form-control" }} {# Applied Bootstrap form-control class #}
                 {% if field.help_text %}
                     <div class="form-text">{{ field.help_text }}</div> {# Bootstrap class for help text #}
@@ -33,4 +26,3 @@
     </form>
 
     <p><a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a></p> {# Applied Bootstrap button classes #}
-{% endblock %}

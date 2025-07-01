@@ -1,0 +1,41 @@
+{# blood_pressure_python_2/measurements/templates/measurements/edit_measurement.html #}
+
+{% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %} {# Load widget_tweaks to apply Bootstrap classes to form fields #}
+
+{% block title %}Edit Measurement - Blood Pressure Tracker{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Edit Blood Pressure Measurement</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="mb-3"> {# Bootstrap spacing #}
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label> {# Apply Bootstrap form-label class #}
+                {{ field|add_class:"form-control" }} {# Apply Bootstrap form-control class #}
+                {% if field.help_text %}
+                    <div class="form-text">{{ field.help_text }}</div> {# Bootstrap class for help text #}
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="alert alert-danger mt-1">{{ error }}</div> {# Bootstrap alert for errors #}
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger"> {# Bootstrap alert for non-field errors #}
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Save Changes</button> {# Changed button text #}
+        </div>
+    </form>
+
+    <p><a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a></p>
+{% endblock %}

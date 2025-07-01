@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'users.apps.UsersConfig',
     'measurements.apps.MeasurementsConfig', # Our new measurements app
+    'widget_tweaks', # For customizing form widgets
 ]
 
 MIDDLEWARE = [

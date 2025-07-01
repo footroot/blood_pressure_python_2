@@ -1,44 +1,79 @@
 {# blood_pressure_python_2/users/templates/base.html #}
-{% load static %} {# Make sure this is at the very top of the file #}
+{% load static %} {# This is the correct and only place you need {% load static %} #}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Blood Pressure Tracker{% endblock %}</title>
-     {% load static %} {# <-- Add this line to load static files #}
-    <link rel="stylesheet" href="{% static 'users/styles.css' %}"> {# <-- Link to your CSS file #}
+
+    {# Bootstrap CSS #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    {# Link to your Custom CSS (users/static/users/styles.css) #}
+    <link rel="stylesheet" href="{% static 'users/styles.css' %}">
 
 </head>
 <body>
-    <nav class="navbar">
-        <div>
-            <a href="{% url 'home' %}">Blood Pressure Tracker</a>
-        </div>
-        <div>
-            {% if user.is_authenticated %}
-                <span>Hello, {{ user.email }}!</span>
-                <a href="{% url 'logout' %}">Logout</a>
-            {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                <a href="{% url 'signup' %}">Sign Up</a>
-            {% endif %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">BP Tracker</a> {# Changed 'home' to 'dashboard' assuming it's your main authenticated view #}
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'add_measurement' %}">Add Measurement</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <span class="nav-link">Welcome, {{ user.email }}</span>
+                        </li>
+                        {# This line is commented out because 'password_change' URL is not yet defined #}
+                        {# <li class="nav-item"> #}
+                        {#     <a class="nav-link" href="{% url 'password_change' %}">Change Password</a> #}
+                        {# </li> #}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container mt-4"> {# Added Bootstrap container for main content and top margin #}
         {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                {% endfor %}
-            </ul>
+            {% for message in messages %}
+                {# Bootstrap alert styles for Django messages #}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
         {% endif %}
 
         {% block content %}
         {% endblock %}
     </div>
-    {% block extra_js %}
-    {% endblock %}
+
+    {# Bootstrap JS (Bundle with Popper), must be at the end of <body> for performance #}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    {% block extra_js %}{% endblock %} {# For any page-specific JavaScript, like for charts #}
 </body>
 </html>

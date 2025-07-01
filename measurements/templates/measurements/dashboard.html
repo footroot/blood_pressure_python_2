@@ -1,58 +1,92 @@
 {# blood_pressure_python_2/measurements/templates/measurements/dashboard.html #}
 {% extends 'base.html' %}
-{% load static %} {# Need this if you plan to use static files here later #}
+{% load static %}
 
 {% block title %}Your Dashboard - Blood Pressure Tracker{% endblock %}
 
 {% block content %}
-    <h1>Your Blood Pressure Dashboard</h1>
+    <h1 class="mb-4">Your Blood Pressure Dashboard</h1>
 
     <p>Welcome, {{ user.email }}!</p>
 
     <p>
-        <a href="{% url 'add_measurement' %}" class="button">Add New Measurement</a>
+        <a href="{% url 'add_measurement' %}" class="btn btn-primary mb-3">Add New Measurement</a>
     </p>
 
+    {# NEW: Blood Pressure Trends Chart Section #}
+    <h2 class="mb-3">Blood Pressure Trends</h2>
+    <div class="card mb-4">
+        <div class="card-body">
+            <canvas id="bpChart"></canvas>
+        </div>
+    </div>
+
     {% if measurements %}
-        <h2>Your Recent Measurements</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date/Time</th>
-                    <th>Systolic</th>
-                    <th>Diastolic</th>
-                    <th>Pulse</th>
-                    <th>Category</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for measurement in measurements %}
+        <h2 class="mb-3">Your Recent Measurements</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
                     <tr>
-                        <td>{{ measurement.timestamp|date:"M d, Y H:i" }}</td>
-                        <td>{{ measurement.systolic }}</td>
-                        <td>{{ measurement.diastolic }}</td>
-                        <td>{{ measurement.pulse }}</td>
-                        <td>{{ measurement.bp_category }}</td>
+                        <th>Date/Time</th>
+                        <th>Systolic</th>
+                        <th>Diastolic</th>
+                        <th>Pulse</th>
+                        <th>Weight</th>
+                        <th>Height</th>
+                        <th>Category</th>
+                        <th>Actions</th> {# Actions column header remains #}
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for measurement in measurements %}
+                        <tr>
+                            <td>{{ measurement.timestamp|date:"M d, Y H:i" }}</td>
+                            <td>{{ measurement.systolic }}</td>
+                            <td>{{ measurement.diastolic }}</td>
+                            <td>{{ measurement.pulse }}</td>
+                            <td>
+                                {% if measurement.weight is not None %}
+                                    {{ measurement.weight }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if measurement.height is not None %}
+                                    {{ measurement.height }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ measurement.bp_category }}</td>
+                            <td>
+                                {# UNCOMMENTED AND CORRECTED: Edit link #}
+                                <a href="{% url 'edit_measurement' measurement.pk %}" class="btn btn-sm btn-info me-1">Edit</a>
+                                {# DELETE LINK REMAINS COMMENTED OUT FOR NOW #}
+                                {# <a href="{% url 'delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger">Delete</a> #}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
         {% comment %} Optional: Add pagination links if you enabled paginate_by in the view {% endcomment %}
         {% if is_paginated %}
-            <div class="pagination">
+            <div class="pagination justify-content-center">
                 <span class="step-links">
                     {% if page_obj.has_previous %}
-                        <a href="?page=1">&laquo; first</a>
-                        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                        <a href="?page=1" class="btn btn-outline-secondary btn-sm">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-outline-secondary btn-sm mx-1">previous</a>
                     {% endif %}
 
-                    <span class="current">
+                    <span class="current btn btn-outline-secondary btn-sm disabled mx-2">
                         Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
                     </span>
 
                     {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}">next</a>
-                        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                        <a href="?page={{ page_obj.next_page_number }}" class="btn btn-outline-secondary btn-sm mx-1">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn btn-outline-secondary btn-sm">last &raquo;</a>
                     {% endif %}
                 </span>
             </div>
@@ -61,4 +95,97 @@
         <p>You haven't logged any blood pressure measurements yet.</p>
         <p>Click "Add New Measurement" to get started!</p>
     {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+    {# Chart.js CDN - Loaded at the end of the body for performance #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('{% url "blood_pressure_data" %}')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.labels.length === 0) {
+                        console.log("No blood pressure data available to display chart.");
+                        const chartContainer = document.getElementById('bpChart').closest('.card');
+                        if (chartContainer) {
+                            chartContainer.innerHTML = '<div class="card-body text-center text-muted">No measurements logged yet to display chart.</div>';
+                        }
+                        return;
+                    }
+
+                    const ctx = document.getElementById('bpChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Systolic',
+                                data: data.systolic,
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                fill: false,
+                                tension: 0.1
+                            }, {
+                                label: 'Diastolic',
+                                data: data.diastolic,
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                fill: false,
+                                tension: 0.1
+                            }, {
+                                label: 'Pulse',
+                                data: data.pulse,
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                fill: false,
+                                tension: 0.1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Date and Time'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'mmHg / BPM'
+                                    },
+                                    beginAtZero: false
+                                }
+                            },
+                            plugins: {
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                },
+                                hover: {
+                                    mode: 'nearest',
+                                    intersect: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching blood pressure data:', error);
+                    const chartContainer = document.getElementById('bpChart').closest('.card');
+                    if (chartContainer) {
+                        chartContainer.innerHTML = '<div class="card-body text-center text-danger">Failed to load chart data. Please try again later.</div>';
+                    }
+                });
+        });
+    </script>
 {% endblock %}

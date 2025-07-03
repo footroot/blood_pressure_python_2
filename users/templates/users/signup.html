@@ -1,39 +1,46 @@
 {# blood_pressure_python_2/users/templates/users/signup.html #}
 {% extends 'base.html' %}
 {% load static %}
+{% load widget_tweaks %} {# <--- THIS LINE IS CRUCIAL AND MUST BE PRESENT! #}
 
 {% block title %}Sign Up - Blood Pressure Tracker{% endblock %}
 
 {% block content %}
-    <h2>Sign Up</h2>
-    <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-            <div class="form-group">
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.help_text %}
-                    <small style="color: gray;">{{ field.help_text }}</small>
-                {% endif %}
-                {% for error in field.errors %}
-                    <p class="errorlist">{{ error }}</p>
-                {% endfor %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <h2 class="mb-3 text-center">Sign Up</h2>
+                <form method="post" class="card p-4 shadow-sm">
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            {{ field.label_tag }}
+                            {# The 'add_class' filter is applied here #}
+                            {{ field|add_class:"form-control" }}
+                            {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            <ul class="list-unstyled mb-0">
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                    </div>
+                </form>
+                <p class="text-center mt-3">Already have an account? <a href="{% url 'users:login' %}">Log In</a></p>
             </div>
-        {% endfor %}
-        {% if form.non_field_errors %}
-            <ul class="errorlist">
-                {% for error in form.non_field_errors %}
-                    <li>{{ error }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-        <div class="form-group">
-            <button type="submit">Sign Up</button>
         </div>
-    </form>
-    <p>Already have an account? <a href="{% url 'login' %}">Log In</a></p>
+    </div>
 {% endblock %}
 
-{% block extra_js %} {# Add this block #}
+{% block extra_js %}
     <script src="{% static 'users/js/password_toggle.js' %}"></script>
 {% endblock %}

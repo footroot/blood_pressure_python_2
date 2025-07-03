@@ -1,0 +1,28 @@
+{# D:\blood_pressure\blood_pressure_python_2\measurements\templates\measurements\measurement_confirm_delete.html #}
+
+{% extends 'base.html' %}
+
+{% block title %}Confirm Delete - Blood Pressure Tracker{% endblock %}
+
+{% block content %}
+    <h2 class="mb-4">Confirm Deletion</h2>
+
+    <div class="alert alert-warning" role="alert">
+        Are you sure you want to delete the following measurement?
+        <br>
+        <br>
+        <strong>Date:</strong> {{ measurement.date|date:"F d, Y" }}<br>
+        <strong>Time:</strong> {{ measurement.time|time:"H:i" }}<br>
+        <strong>Systolic:</strong> {{ measurement.systolic }}<br>
+        <strong>Diastolic:</strong> {{ measurement.diastolic }}<br>
+        <strong>Pulse:</strong> {{ measurement.pulse }}<br>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="d-flex justify-content-start gap-2"> {# Use d-flex and gap-2 for spacing buttons #}
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+{% endblock %}

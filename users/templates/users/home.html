@@ -1,15 +1,29 @@
 {# blood_pressure_python_2/users/templates/users/home.html #}
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Home - Blood Pressure Tracker{% endblock %}
 
 {% block content %}
-    <h1>Welcome to the Blood Pressure Tracker!</h1>
-    {% if user.is_authenticated %}
-        <p>You are logged in as {{ user.email }}.</p>
-        <p>You can now start tracking your blood pressure.</p>
-        <p><a href="{% url 'dashboard' %}">Go to your Dashboard</a></p>
-    {% else %}
-        <p>Please <a href="{% url 'login' %}">log in</a> or <a href="{% url 'signup' %}">sign up</a> to start tracking your blood pressure.</p>
-    {% endif %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h1 class="mb-4">Welcome to the Blood Pressure Tracker!</h1>
+
+                {% if user.is_authenticated %}
+                    <p class="lead">You are logged in as **{{ user.email }}**.</p>
+                    <p class="lead">You can now start tracking your blood pressure.</p>
+                    <p class="mt-4">
+                        <a href="{% url 'users:dashboard' %}" class="btn btn-primary btn-lg">Go to your Dashboard</a>
+                    </p>
+                {% else %}
+                    <p class="lead">Please <a href="{% url 'users:login' %}">log in</a> or <a href="{% url 'users:signup' %}">sign up</a> to start tracking your blood pressure.</p>
+                    <div class="mt-4">
+                        <a href="{% url 'users:login' %}" class="btn btn-success btn-lg me-2">Log In</a>
+                        <a href="{% url 'users:signup' %}" class="btn btn-info btn-lg">Sign Up</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 {% endblock %}

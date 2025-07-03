@@ -62,8 +62,8 @@
                             <td>
                                 {# UNCOMMENTED AND CORRECTED: Edit link #}
                                 <a href="{% url 'edit_measurement' measurement.pk %}" class="btn btn-sm btn-info me-1">Edit</a>
-                                {# DELETE LINK REMAINS COMMENTED OUT FOR NOW #}
-                                {# <a href="{% url 'delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger">Delete</a> #}
+                                {# DELETE LINK #}
+                                <a href="{% url 'delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger ms-1">Delete</a>
                             </td>
                         </tr>
                     {% endfor %}

@@ -1,0 +1,193 @@
+{# D:\blood_pressure\blood_pressure_python_2\users\templates\users\dashboard.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load measurement_filters %}
+
+{% block title %}Your Dashboard - BP Tracker{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1>Welcome to Your Dashboard, {{ user.email }}!</h1>
+        <p>This is your personalized blood pressure tracking dashboard.</p>
+
+        <h2>Recent Measurements</h2>
+        {% if recent_measurements %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Systolic</th>
+                            <th>Diastolic</th>
+                            <th>Pulse</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for measurement in recent_measurements %}
+                        <tr>
+                            <td>{{ measurement.timestamp|date:"Y-m-d H:i" }}</td>
+                            <td>{{ measurement.systolic }}</td>
+                            <td>{{ measurement.diastolic }}</td>
+                            <td>{{ measurement.pulse }}</td>
+                            <td>
+                                <a href="{% url 'measurements:edit_measurement' measurement.pk %}" class="btn btn-sm btn-info">Edit</a>
+                                <a href="{% url 'measurements:delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <a href="{% url 'measurements:measurement_list' %}" class="btn btn-primary">View All Measurements</a>
+        {% else %}
+            <p>No measurements recorded yet. <a href="{% url 'measurements:add_measurement' %}">Add your first measurement!</a></p>
+        {% endif %}
+
+        <hr>
+
+        <h2>Calendar View</h2>
+        <p><a href="{% url 'measurements:calendar_view' %}" class="btn btn-secondary">View Full Calendar</a></p>
+
+        <div class="table-responsive">
+            <table class="table table-bordered calendar-table">
+                <thead>
+                    <tr>
+                        {% for day_name in day_names %}
+                            <th class="text-center">{{ day_name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in month_calendar %}
+                        <tr>
+                            {% for day, weekday_num in week %}
+                                <td class="text-center calendar-day
+                                    {% if day == 0 %}muted{% endif %}
+                                    {% if day == today.day and month == today.month and year == today.year %}today{% endif %}
+                                    {% if day in measurements_by_day %}has-measurements{% endif %}">
+                                    {% if day != 0 %}
+                                        <span class="day-number">{{ day }}</span>
+                                        {% if day in measurements_by_day %}
+                                            <div class="measurements-list mt-1">
+                                                {% for measurement in measurements_by_day|get_item:day %}
+                                                    <a href="{% url 'measurements:edit_measurement' measurement.pk %}"
+                                                       class="badge bg-primary measurement-badge"
+                                                       title="Sys: {{ measurement.systolic }}, Dia: {{ measurement.diastolic }}, Pulse: {{ measurement.pulse }} ({{ measurement.timestamp|date:'H:i' }})">
+                                                        {{ measurement.systolic }}/{{ measurement.diastolic }}
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        &nbsp;
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="text-center mt-3">Days with measurements are highlighted. Today is highlighted.</p>
+
+
+        <hr>
+
+        <h2>Blood Pressure Chart</h2>
+        {# NEW: Wrap canvas in a container with controlled dimensions #}
+        <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+            <canvas id="bloodPressureChart"></canvas>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {# 1. Load Chart.js library #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    {# 2. Your chart initialization code #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('bloodPressureChart');
+
+            if (ctx) { // Ensure the canvas element exists
+                fetch('{% url "measurements:blood_pressure_data" %}')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        new Chart(ctx, {
+                            type: 'line', // Line chart for trends
+                            data: {
+                                labels: data.labels, // Dates/times from your Django view
+                                datasets: [
+                                    {
+                                        label: 'Systolic (mmHg)',
+                                        data: data.systolic,
+                                        borderColor: 'rgb(75, 192, 192)',
+                                        tension: 0.1,
+                                        fill: false // Do not fill area under the line
+                                    },
+                                    {
+                                        label: 'Diastolic (mmHg)',
+                                        data: data.diastolic,
+                                        borderColor: 'rgb(255, 99, 132)',
+                                        tension: 0.1,
+                                        fill: false
+                                    },
+                                    {
+                                        label: 'Pulse (bpm)',
+                                        data: data.pulse,
+                                        borderColor: 'rgb(54, 162, 235)',
+                                        tension: 0.1,
+                                        fill: false
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false, // Allows you to control size with CSS
+                                scales: {
+                                    y: {
+                                        beginAtZero: false, // Blood pressure usually not zero
+                                        title: {
+                                            display: true,
+                                            text: 'Reading'
+                                        }
+                                    },
+                                    x: {
+                                        title: {
+                                            display: true,
+                                            text: 'Date & Time'
+                                        }
+                                    }
+                                },
+                                plugins: {
+                                    tooltip: {
+                                        mode: 'index',
+                                        intersect: false
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Last 30 Days Blood Pressure & Pulse'
+                                    }
+                                }
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching blood pressure data:', error);
+                        // Optionally display a message to the user here
+                        const chartContainer = document.querySelector('.chart-container'); // Or adjust selector
+                        if (chartContainer) {
+                            chartContainer.innerHTML = '<p class="text-danger">Could not load chart data. Please try again later.</p>';
+                        }
+                    });
+            }
+        });
+    </script>
+{% endblock %}

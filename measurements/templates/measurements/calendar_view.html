@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %} {# Make sure you also load your custom filter if you're using it here #}
+{% load measurement_filters %} {# <-- ADD THIS LINE to load your get_item filter #}
+
+{% block title %}Blood Pressure Calendar - {{ month_name }} {{ year }}{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4 text-center">
+            {# Navigation links updated to use base_url and query parameters #}
+            <a href="{{ base_url }}?{{ prev_month_params }}" class="btn btn-outline-secondary btn-sm me-2">&lt; Previous</a>
+            {{ month_name }} {{ year }}
+            <a href="{{ base_url }}?{{ next_month_params }}" class="btn btn-outline-secondary btn-sm ms-2">Next &gt;</a>
+        </h1>
+
+        <div class="table-responsive">
+            <table class="table table-bordered calendar-table">
+                <thead>
+                    <tr>
+                        {# Weekday headers now use the 'day_names' variable from context #}
+                        {% for day_name in day_names %} {# <-- CORRECTED LINE #}
+                            <th class="text-center">{{ day_name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in month_calendar %}
+                        <tr>
+                            {% for day, weekday_num in week %}
+                                <td class="text-center calendar-day
+                                    {% if day == 0 %}muted{% endif %}
+                                    {% if day == today.day and month == today.month and year == today.year %}today{% endif %}
+                                    {% if day in measurements_by_day %}has-measurements{% endif %}">
+                                    {% if day != 0 %}
+                                        <span class="day-number">{{ day }}</span>
+                                        {% if day in measurements_by_day %}
+                                            <div class="measurements-list mt-1">
+                                                {% for measurement in measurements_by_day|get_item:day %}
+                                                    {# Link to edit measurement or view details for the specific measurement #}
+                                                    <a href="{% url 'measurements:edit_measurement' measurement.pk %}"
+                                                       class="badge bg-primary measurement-badge"
+                                                       title="Sys: {{ measurement.systolic }}, Dia: {{ measurement.diastolic }}, Pulse: {{ measurement.pulse }} ({{ measurement.timestamp|date:'H:i' }})">
+                                                        {{ measurement.systolic }}/{{ measurement.diastolic }}
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        &nbsp; {# Empty cell for padding days outside the current month #}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-center mt-3">Days with measurements are highlighted. Today is highlighted.</p>
+
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {# Add any specific JavaScript for the calendar view here if needed later #}
+{% endblock %}

@@ -8,24 +8,28 @@ from decouple import config
 # You might need to adjust the path to .env if running this from outside project root
 # For simplicity, assume .env is next to this script for testing.
 # If not, comment out the config lines and hardcode for this test only.
-EMAIL_HOST = config('EMAIL_HOST', 'in-v3.mailjet.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST = config("EMAIL_HOST", "in-v3.mailjet.com")
+EMAIL_PORT = config("EMAIL_PORT", default=587, cast=int)
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
 # EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=False, cast=bool) # Use if needed instead of TLS
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', 'bfdef101276ba71671b9b1bfdc5a8f04')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', '58591babf4845fa9fa0deb8bc4242ccb')
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", "bfdef101276ba71671b9b1bfdc5a8f04")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", "58591babf4845fa9fa0deb8bc4242ccb")
 
 # Fallback to hardcoded values if config fails or for quick test
-if 'in-v3.mailjet.com' in EMAIL_HOST:
-    print("WARNING: Using hardcoded SMTP values. Make sure to replace them or set your .env correctly.")
-    EMAIL_HOST = 'in-v3.mailjet.com' # REPLACE THIS
-    EMAIL_PORT = 587             # REPLACE THIS
-    EMAIL_USE_TLS = True         # REPLACE THIS (or False)
-    EMAIL_HOST_USER = 'bfdef101276ba71671b9b1bfdc5a8f04' # REPLACE THIS
-    EMAIL_HOST_PASSWORD = '58591babf4845fa9fa0deb8bc4242ccb' # REPLACE THIS
+if "in-v3.mailjet.com" in EMAIL_HOST:
+    print(
+        "WARNING: Using hardcoded SMTP values. Make sure to replace them or set your .env correctly."
+    )
+    EMAIL_HOST = "in-v3.mailjet.com"  # REPLACE THIS
+    EMAIL_PORT = 587  # REPLACE THIS
+    EMAIL_USE_TLS = True  # REPLACE THIS (or False)
+    EMAIL_HOST_USER = "bfdef101276ba71671b9b1bfdc5a8f04"  # REPLACE THIS
+    EMAIL_HOST_PASSWORD = "58591babf4845fa9fa0deb8bc4242ccb"  # REPLACE THIS
 
-SENDER_EMAIL = "footroot@mytaller.info" # Can be anything unless your provider enforces it
-RECEIVER_EMAIL = "footroot.72@gmail.com" # Send to an email you can check
+SENDER_EMAIL = (
+    "footroot@mytaller.info"  # Can be anything unless your provider enforces it
+)
+RECEIVER_EMAIL = "footroot.72@gmail.com"  # Send to an email you can check
 
 print(f"Attempting to connect to SMTP server: {EMAIL_HOST}:{EMAIL_PORT}")
 print(f"User: {EMAIL_HOST_USER}")
@@ -51,7 +55,9 @@ try:
 
 except smtplib.SMTPAuthenticationError as e:
     print(f"SMTP Authentication Error: {e}")
-    print("Double-check your username, password, and app-specific passwords (for Gmail/Microsoft).")
+    print(
+        "Double-check your username, password, and app-specific passwords (for Gmail/Microsoft)."
+    )
 except smtplib.SMTPConnectError as e:
     print(f"SMTP Connection Error: {e}")
     print("Check EMAIL_HOST, EMAIL_PORT, and firewall settings.")
@@ -60,6 +66,6 @@ except smtplib.SMTPException as e:
 except Exception as e:
     print(f"An unexpected error occurred: {e}")
 finally:
-    if 'server' in locals() and server:
+    if "server" in locals() and server:
         server.quit()
         print("SMTP server connection closed.")

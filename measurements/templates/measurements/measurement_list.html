@@ -1,0 +1,51 @@
+{# D:\blood_pressure\blood_pressure_python_2\measurements\templates\measurements\measurement_list.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Measurements - BP Tracker{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1>All Your Blood Pressure Measurements</h1>
+
+        {% if measurements %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Systolic (mmHg)</th>
+                            <th>Diastolic (mmHg)</th>
+                            <th>Pulse (bpm)</th>
+                            <th>Notes</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for measurement in measurements %}
+                        <tr>
+                            <td>{{ measurement.timestamp|date:"Y-m-d H:i" }}</td>
+                            <td>{{ measurement.systolic }}</td>
+                            <td>{{ measurement.diastolic }}</td>
+                            <td>{{ measurement.pulse }}</td>
+                            <td>{{ measurement.notes|default_if_none:"-" }}</td>
+                            <td>
+                                <a href="{% url 'measurements:edit_measurement' measurement.pk %}" class="btn btn-sm btn-info">Edit</a>
+                                <a href="{% url 'measurements:delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {# Add pagination here later if you have many measurements #}
+        {% else %}
+            <p>You have not recorded any blood pressure measurements yet.</p>
+        {% endif %}
+
+        <div class="mt-4">
+            <a href="{% url 'measurements:add_measurement' %}" class="btn btn-success me-2">Add New Measurement</a>
+            <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+{% endblock %}

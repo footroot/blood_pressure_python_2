@@ -1,12 +1,14 @@
-from django.shortcuts import render, redirect
+# D:\blood_pressure\blood_pressure_python_2\users\views.py
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.contrib.auth.views import LoginView, LogoutView
-# For signup and potentialy a home page
 from django.views.generic import CreateView, TemplateView, View
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 from .models import CustomUser
+from django.contrib.auth.decorators import login_required
 
 # For email verification
 from django.core.mail import send_mail
@@ -15,10 +17,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-import six  # For Python 2/3 compatibility in tokens.py, used by Django's default PasswordResetTokenGenerator
-
-
-# Create your views here.
+import six # For Python 2/3 compatibility in tokens.py, used by Django's default PasswordResetTokenGenerator
 
 # Helper class for token generation (Django's default for password reset)
 class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
@@ -29,21 +28,17 @@ class AccountActivationTokenGenerator(PasswordResetTokenGenerator):
             six.text_type(user.is_active) + six.text_type(user.is_verified)
         )
 
-
 account_activation_token = AccountActivationTokenGenerator()
 
 # --Home Page View--
-
-
 class HomePageView(TemplateView):
     template_name = 'users/home.html'
 
 # ---User Registration View---
-
-
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy('login')
+    # FIX: Use namespaced URL for login after signup
+    success_url = reverse_lazy('users:login') # <--- UPDATED
     template_name = 'users/signup.html'
 
     def form_valid(self, form):
@@ -74,7 +69,6 @@ class SignUpView(CreateView):
 
         messages.success(
             self.request, 'Your account has been created! Please check your email to verify your account.')
-        # Important: call super().form_valid(form) AFTER sending email
         return super().form_valid(form)
 
 
@@ -90,28 +84,27 @@ class CustomLoginView(LoginView):
             messages.warning(
                 self.request, 'Your email is not verified. Please check your inbox for the verification link.')
             logout(self.request)  # Log out if not verified
-            return reverse_lazy('login')  # Redirect back to login
+            # FIX: Use namespaced URL for login when redirecting back
+            return reverse_lazy('users:login') # <--- UPDATED
 
-        return reverse_lazy('home')
+        # FIX: Use namespaced URL for home/dashboard after successful login
+        return reverse_lazy('users:dashboard') # Changed from 'home' to 'dashboard' as per common practice for authenticated users. If 'home' is intended, make it 'users:home'
 
     def form_invalid(self, form):
         messages.error(self.request, 'Invalid email or password.')
         return super().form_invalid(form)
 
 # --- User Logout View ---
-
-
 class CustomLogoutView(LogoutView):
-    next_page = reverse_lazy('login')
+    # FIX: Use namespaced URL for login after logout
+    next_page = reverse_lazy('users:login') # <--- UPDATED
 
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
         messages.success(request, 'You have been successfully logged out.')
         return response
 
-    # --- Account Activation View ---
-
-
+# --- Account Activation View ---
 class ActivateAccountView(View):
     def get(self, request, uidb64, token):
         try:
@@ -127,8 +120,42 @@ class ActivateAccountView(View):
             login(request, user)  # Log the user in after verification
             messages.success(
                 request, 'Thank you for your email verification. Your account is now active.')
-            return redirect('home')
+            # FIX: Use namespaced URL for home after activation
+            return redirect('users:home') # <--- UPDATED
         else:
             messages.error(
                 request, 'Activation link is invalid or has expired!')
-            return redirect('signup')  # Or a dedicated error page
+            # FIX: Use namespaced URL for signup if activation fails
+            return redirect('users:signup') # <--- UPDATED
+
+# --- Password Reset Views (using Django's built-in views) ---
+# You'd typically define these in urls.py directly or custom class-based views if needed.
+# If you are using custom forms for password reset, ensure they are imported.
+
+# You might have custom Password Reset views here if you need to override Django's defaults.
+# If you are just using Django's defaults, these might not be in views.py.
+# Assuming you have custom class-based views as per your previous code snippets:
+
+# Custom Password Reset View (if overriding default behavior)
+from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetCompleteView
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'users/password_reset_form.html'
+    email_template_name = 'users/password_reset_email.html'
+    subject_template_name = 'users/password_reset_subject.txt'
+    success_url = reverse_lazy('users:password_reset_done') # Use namespaced URL
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Reset your password'
+        return context
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = 'users/password_reset_done.html'
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'users/password_reset_confirm.html'
+    success_url = reverse_lazy('users:password_reset_complete') # Use namespaced URL
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = 'users/password_reset_complete.html'

@@ -17,7 +17,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'dashboard' %}">BP Tracker</a> {# Changed 'home' to 'dashboard' assuming it's your main authenticated view #}
+            <a class="navbar-brand" href="{% url 'users:dashboard' %}">BP Tracker</a> {# Correct: uses 'users:dashboard' #}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -25,10 +25,11 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                            <a class="nav-link" href="{% url 'users:dashboard' %}">Dashboard</a> {# Correct: uses 'users:dashboard' #}
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'add_measurement' %}">Add Measurement</a>
+                            {# 'add_measurement' is in the 'measurements' app which doesn't have an app_name, so this is okay if no namespace is set for 'measurements' #}
+                            <a class="nav-link" href="{% url 'measurements:add_measurement' %}">Add Measurement</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -39,17 +40,17 @@
                         </li>
                         {# This line is commented out because 'password_change' URL is not yet defined #}
                         {# <li class="nav-item"> #}
-                        {#     <a class="nav-link" href="{% url 'password_change' %}">Change Password</a> #}
+                        {#    <a class="nav-link" href="{% url 'password_change' %}">Change Password</a> #}
                         {# </li> #}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                            <a class="nav-link" href="{% url 'users:logout' %}">Logout</a> {# FIX: Added 'users:' namespace #}
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            <a class="nav-link" href="{% url 'users:login' %}">Login</a> {# FIX: Added 'users:' namespace #}
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+                            <a class="nav-link" href="{% url 'users:signup' %}">Sign Up</a> {# FIX: Added 'users:' namespace #}
                         </li>
                     {% endif %}
                 </ul>

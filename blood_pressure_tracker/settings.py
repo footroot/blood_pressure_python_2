@@ -26,11 +26,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users.apps.UsersConfig', # Use this instead of just 'users' 
+    'measurements.apps.MeasurementsConfig', # Use this instead of just 'measurements' 
     'django.contrib.sites',
-    'users.apps.UsersConfig',
-    'measurements.apps.MeasurementsConfig', # Our new measurements app
-    'widget_tweaks', # For customizing form widgets
-]
+    'widget_tweaks',
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -124,7 +124,7 @@ LOGOUT_REDIRECT_URL = '/login/' # Optional: where to redirect after logout
 SITE_ID = 1
 
 # Email settings for development 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Prints emails to console 
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # Prints emails to console 
 # OR for saving to a file (more useful if you want to inspect HTML emails): 
 # EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend' 
 # EMAIL_FILE_PATH = BASE_DIR / 'sent_emails' # Make sure this directory exists!

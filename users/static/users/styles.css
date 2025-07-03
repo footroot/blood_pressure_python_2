@@ -172,3 +172,50 @@ table tr:hover {
 }
 
 /* end styles for dashboard */
+
+/* styles for calendar view */
+
+/* In your static/css/style.css or similar */
+
+.calendar-table {
+    width: 100%;
+    margin-bottom: 0; /* Remove default table margin */
+    font-size: 0.9rem; /* Make text a bit smaller */
+}
+
+.calendar-table th,
+.calendar-table td {
+    padding: 0.5rem; /* Adjust padding */
+    height: 100px; /* Give each day cell a fixed height */
+    vertical-align: top; /* Align content to the top */
+}
+
+.calendar-table .day-number {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.calendar-table .muted {
+    background-color: #f8f9fa; /* Light grey for padding days */
+    color: #6c757d; /* Muted text color */
+}
+
+.calendar-table .today {
+    background-color: #e6ffe6; /* Light green for today */
+    border: 2px solid #28a745; /* Green border for today */
+}
+
+.calendar-table .has-measurements {
+    background-color: #e0f2f7; /* Light blue for days with measurements */
+}
+
+.measurement-badge {
+    display: block; /* Make each badge take full width */
+    margin-bottom: 2px; /* Space between badges */
+    white-space: nowrap; /* Prevent badge text from wrapping */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Add ellipsis if text is too long */
+}
+
+/* end styles calendar view */

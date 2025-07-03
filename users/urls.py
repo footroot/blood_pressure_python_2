@@ -1,34 +1,34 @@
 # D:\blood_pressure\blood_pressure_python_2\users\urls.py
 
-from django.urls import path, include # Add 'include' for the possibility of using it later, though not strictly needed here
+from django.urls import path, re_path, include
 from django.contrib.auth import views as auth_views
-from . import views as users_views # Import our views
-from measurements import views as measurements_views
+from . import views
 
-app_name = 'users' # <--- This registers the namespace
+app_name = "users"
 
 urlpatterns = [
-    path('', users_views.HomePageView.as_view(), name='home'),
-    path('signup/', users_views.SignUpView.as_view(), name='signup'),
-    path('login/', users_views.CustomLoginView.as_view(), name='login'),
-    path('logout/', users_views.CustomLogoutView.as_view(), name='logout'),
-    # New URL for account activation
-    path('activate/<uidb64>/<token>/', users_views.ActivateAccountView.as_view(), name='activate_account'),
-
-    # Dashboard URL (already present)
-    path('dashboard/', measurements_views.dashboard_view, name='dashboard'),
-
-    # --- Password Reset URLs (ADDED THESE LINES) ---
-    path('password_reset/',
-         users_views.CustomPasswordResetView.as_view(),
-         name='password_reset'),
-    path('password_reset/done/',
-         users_views.CustomPasswordResetDoneView.as_view(),
-         name='password_reset_done'),
-    path('reset/<uidb64>/<token>/',
-         users_views.CustomPasswordResetConfirmView.as_view(),
-         name='password_reset_confirm'),
-    path('reset/done/',
-         users_views.CustomPasswordResetCompleteView.as_view(),
-         name='password_reset_complete'),
+    # User authentication and profile URLs
+    path("signup/", views.signup, name="signup"),
+    path("dashboard/", views.dashboard, name="dashboard"),
+    path(
+        "login/",
+        auth_views.LoginView.as_view(template_name="users/login.html"),
+        name="login",
+    ),
+    path(
+        "logout/", auth_views.LogoutView.as_view(next_page="users:login"), name="logout"
+    ),
+    path("profile/edit/", views.profile_edit, name="profile_edit"),
+    # --- EMAIL ACTIVATION URLs ---
+    path(
+        "account_activation_sent/",
+        views.account_activation_sent,
+        name="account_activation_sent",
+    ),
+    # CORRECTED: Relaxed the token regex length to allow up to 40 characters for the second part
+    re_path(r"activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,40})/$",
+            views.activate, name="activate"),
+    # -----------------------------
+    # Include Django's default authentication URLs for password reset, etc.
+    path("", include("django.contrib.auth.urls")),
 ]

@@ -4,8 +4,7 @@ Hi {{ user.email }},
 
 Please click on the link below to activate your account on Blood Pressure Tracker:
 
-http://{{ domain }}{% url 'users:activate_account' uidb64=uid token=token %} {# <--- FIX: Added 'users:' namespace #}
-
+http://{{ domain }}{% url 'users:activate' uidb64=uid token=token %}
 If you did not request this, please ignore this email.
 
 Thanks,

@@ -7,8 +7,27 @@
 
 {% block content %}
     <div class="container mt-4">
-        <h1>Welcome to Your Dashboard, {{ user.email }}!</h1>
+        {# UPDATED WELCOME MESSAGE AND PROFILE DISPLAY #}
+        <h1>Welcome to Your Dashboard, {{ user.get_full_name_display }}!</h1>
         <p>This is your personalized blood pressure tracking dashboard.</p>
+        
+        {# Profile Picture and Info #}
+        <div class="mb-4 d-flex align-items-center">
+            {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;">
+            {% else %}
+                {# Provide a path to a default profile picture in your static files #}
+                <img src="{% static 'users/profile_pics/default_profile.png' %}" alt="Default Profile" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;">
+            {% endif %}
+            <div>
+                <p class="mb-0">Full Name: **{{ user.first_name|default:'N/A' }} {{ user.last_name|default:'N/A' }}**</p>
+                <p class="mb-0">Email: {{ user.email }}</p>
+                <p class="mb-0">Mobile: {{ user.phone_mobile|default:'N/A' }}</p>
+                <p class="mb-0">Address: {{ user.address|default:'N/A' }}</p>
+                <a href="{% url 'users:profile_edit' %}" class="btn btn-sm btn-outline-primary mt-2">Edit Profile</a>
+            </div>
+        </div>
+        <hr>
 
         {# Recent Blood Pressure Readings Table #}
         <h2>Recent Blood Pressure Readings</h2>

@@ -1,0 +1,25 @@
+{# D:\blood_pressure\blood_pressure_python_2\users\templates\users\account_activation_sent.html #}
+{% extends 'base.html' %} {# Assuming you have a base.html in your project's main templates folder #}
+
+{% block title %}Check Your Email{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg p-4">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Account Activation Email Sent</h2>
+                    <p class="card-text text-center">
+                        Please check your email to activate your account.
+                        If you don't receive an email within a few minutes, please check your spam folder.
+                    </p>
+                    <p class="card-text text-center text-muted mt-3">
+                        You can close this page now.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

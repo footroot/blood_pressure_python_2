@@ -1,0 +1,70 @@
+{# D:\blood_pressure\blood_pressure_python_2\users\templates\users\profile_edit.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - BP Tracker{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Edit Your Profile, {{ user.first_name|default:user.email }}</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" enctype="multipart/form-data"> {# IMPORTANT: enctype for file uploads #}
+                            {% csrf_token %}
+
+                            {# Display current profile picture #}
+                            {% if user.profile_picture %}
+                                <div class="mb-3 text-center">
+                                    <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail" style="max-width: 150px; max-height: 150px; border-radius: 50%;">
+                                    <p class="mt-2">Current Profile Picture</p>
+                                </div>
+                            {% else %}
+                                <div class="mb-3 text-center">
+                                    <p>No profile picture uploaded yet.</p>
+                                </div>
+                            {% endif %}
+
+                            {% for field in form %}
+                                <div class="mb-3">
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                        <div class="form-text text-muted">{{ field.help_text }}</div>
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                        <div class="alert alert-danger">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="{% url 'users:dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .img-thumbnail {
+        object-fit: cover;
+    }
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+    input[type="file"] {
+        padding: 0; /* Adjust padding for file input */
+    }
+</style>
+{% endblock %}

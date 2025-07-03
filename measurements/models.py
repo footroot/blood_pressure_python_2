@@ -30,14 +30,14 @@ class Measurement(models.Model):
         blank=True,
         help_text="Weight (e.g., kg or lbs, specify units consistently)"
     )
-    # Add the new height field here
     height = models.DecimalField(
-        max_digits=4,      # e.g., 99.99 (for meters) or 999.9 (for cm)
-        decimal_places=2,  # e.g., allows two decimal places (e.g., 1.75 meters)
-        null=True,         # Allows the field to be NULL in the database
-        blank=True,        # Allows the field to be blank in forms
-        help_text="Height (e.g., in meters: 1.75 or in cm: 175.00)"
+        max_digits=4,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Height (e.g., in meters: 1.75 or in cm: 175.00 - if in cm, remember to divide by 100 for BMI)"
     )
+    # Changed from auto_now_add=True to default=timezone.now to allow manual editing of timestamp if needed
     timestamp = models.DateTimeField(default=timezone.now)
 
     class Meta:
@@ -50,33 +50,82 @@ class Measurement(models.Model):
 
     @property
     def bp_category(self):
-        if self.systolic < 120 and self.diastolic < 80:
+        """
+        Categorizes blood pressure based on AHA/ACC 2017 guidelines,
+        with an added 'Low' category as requested.
+        """
+        s = self.systolic
+        d = self.diastolic
+
+        # Low Blood Pressure (Hypotension) - ADDED THIS CONDITION FIRST
+        if s < 90 or d < 60:
+            return "Low"
+        # Normal Blood Pressure
+        elif s < 120 and d < 80:
             return "Normal"
-        elif (120 <= self.systolic < 130) and self.diastolic < 80:
+        # Elevated
+        elif (120 <= s < 130) and d < 80:
             return "Elevated"
-        elif (130 <= self.systolic < 140) or (80 <= self.diastolic < 90):
+        # High Blood Pressure (Hypertension Stage 1)
+        elif (130 <= s < 140) or (80 <= d < 90):
             return "High Blood Pressure (Hypertension Stage 1)"
-        elif (140 <= self.systolic) or (90 <= self.diastolic):
+        # High Blood Pressure (Hypertension Stage 2)
+        elif (s >= 140) or (d >= 90):
             return "High Blood Pressure (Hypertension Stage 2)"
-        elif (self.systolic > 180 and self.diastolic > 120):
+        # Hypertensive Crisis (emergency care needed) - Stricter condition (AND)
+        # You might consider 'or' here if either being critical is enough for crisis.
+        elif (s > 180 and d > 120):
             return "Hypertensive Crisis"
         else:
-            return "Uncategorized"
+            return "Uncategorized" # Should ideally not be reached with typical values
 
-    # You can add a property here to calculate BMI later if height and weight are present
     @property
     def bmi(self):
-        if self.weight and self.height:
-            # Assuming weight in kg and height in meters for standard BMI calculation
-            # BMI = weight (kg) / (height (m))^2
-            # You might need to convert units if you're storing in lbs/cm
+        """
+        Calculates Body Mass Index (BMI).
+        Assumes weight is in kilograms and height is in meters.
+        BMI = weight (kg) / (height (m))^2
+        """
+        if self.weight is not None and self.height is not None:
             try:
-                # Ensure height is not zero to avoid division by zero
-                if float(self.height) > 0:
-                    # Convert Decimal to float for calculation precision
-                    return round(float(self.weight) / (float(self.height) ** 2), 2)
+                # Convert Decimal to float for calculation precision
+                height_m = float(self.height)
+                weight_kg = float(self.weight)
+
+                if height_m > 0:
+                    # If height is stored in centimeters (e.g., 175.00), convert to meters: (height_m / 100)
+                    # Based on your help_text "in meters: 1.75 or in cm: 175.00 - if in cm, remember to divide by 100 for BMI)"
+                    # I'm assuming 'self.height' is already in meters if you input 1.75.
+                    # If you consistently input in CM, you must add /100 here.
+                    # For now, I'll keep it as if it's already meters to align with the direct BMI formula.
+                    # If you input 175 for 1.75 meters, change height_m to (height_m / 100).
+                    return round(weight_kg / (height_m ** 2), 2)
                 else:
-                    return None # Height cannot be zero
+                    return None # Height cannot be zero or non-positive
             except (ValueError, TypeError):
                 return None # Handle cases where conversion fails
         return None # Return None if weight or height is not available
+
+    @property
+    def bmi_category(self):
+        """
+        Categorizes BMI into standard classifications (e.g., CDC/WHO guidelines).
+        Requires the 'bmi' property to be calculated first.
+        """
+        if self.bmi is None:
+            return "N/A" # Or "No BMI data"
+        
+        bmi_val = self.bmi
+
+        if bmi_val < 18.5:
+            return "Underweight"
+        elif 18.5 <= bmi_val <= 24.9:
+            return "Normal weight" # Aligns with "fit"
+        elif 25.0 <= bmi_val <= 29.9:
+            return "Overweight"
+        elif 30.0 <= bmi_val <= 34.9:
+            return "Obese (Class I)"
+        elif 35.0 <= bmi_val <= 39.9:
+            return "Obese (Class II)"
+        else: # bmi_val >= 40.0
+            return "Obese (Class III)"

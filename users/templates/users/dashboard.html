@@ -10,9 +10,10 @@
         <h1>Welcome to Your Dashboard, {{ user.email }}!</h1>
         <p>This is your personalized blood pressure tracking dashboard.</p>
 
-        <h2>Recent Measurements</h2>
+        {# Recent Blood Pressure Readings Table #}
+        <h2>Recent Blood Pressure Readings</h2>
         {% if recent_measurements %}
-            <div class="table-responsive">
+            <div class="table-responsive mb-5">
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -20,6 +21,8 @@
                             <th>Systolic</th>
                             <th>Diastolic</th>
                             <th>Pulse</th>
+                            <th>Notes</th>
+                            <th>BP Category</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -30,6 +33,8 @@
                             <td>{{ measurement.systolic }}</td>
                             <td>{{ measurement.diastolic }}</td>
                             <td>{{ measurement.pulse }}</td>
+                            <td>{{ measurement.notes|default_if_none:"-" }}</td>
+                            <td>{{ measurement.bp_category }}</td>
                             <td>
                                 <a href="{% url 'measurements:edit_measurement' measurement.pk %}" class="btn btn-sm btn-info">Edit</a>
                                 <a href="{% url 'measurements:delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger">Delete</a>
@@ -39,7 +44,40 @@
                     </tbody>
                 </table>
             </div>
-            <a href="{% url 'measurements:measurement_list' %}" class="btn btn-primary">View All Measurements</a>
+
+            {# Recent Body Metrics Table #}
+            <h2>Recent Weight & BMI</h2>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Weight</th>
+                            <th>Height</th>
+                            <th>BMI</th>
+                            <th>BMI Category</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for measurement in recent_measurements %}
+                        <tr>
+                            <td>{{ measurement.timestamp|date:"Y-m-d H:i" }}</td>
+                            <td>{{ measurement.weight|default_if_none:"-" }}</td>
+                            <td>{{ measurement.height|default_if_none:"-" }}</td>
+                            <td>{{ measurement.bmi|default_if_none:"-" }}</td>
+                            <td>{{ measurement.bmi_category }}</td>
+                            <td>
+                                <a href="{% url 'measurements:edit_measurement' measurement.pk %}" class="btn btn-sm btn-info">Edit</a>
+                                <a href="{% url 'measurements:delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <a href="{% url 'measurements:measurement_list' %}" class="btn btn-primary mt-4">View All Measurements</a>
         {% else %}
             <p>No measurements recorded yet. <a href="{% url 'measurements:add_measurement' %}">Add your first measurement!</a></p>
         {% endif %}
@@ -73,8 +111,12 @@
                                                 {% for measurement in measurements_by_day|get_item:day %}
                                                     <a href="{% url 'measurements:edit_measurement' measurement.pk %}"
                                                        class="badge bg-primary measurement-badge"
-                                                       title="Sys: {{ measurement.systolic }}, Dia: {{ measurement.diastolic }}, Pulse: {{ measurement.pulse }} ({{ measurement.timestamp|date:'H:i' }})">
+                                                       title="Sys: {{ measurement.systolic }}, Dia: {{ measurement.diastolic }}, Pulse: {{ measurement.pulse }}, BP Cat: {{ measurement.bp_category }}, BMI: {{ measurement.bmi|default_if_none:'N/A' }}, BMI Cat: {{ measurement.bmi_category }} ({{ measurement.timestamp|date:'H:i' }})">
                                                         {{ measurement.systolic }}/{{ measurement.diastolic }}
+                                                        <br><small>BP: {{ measurement.bp_category }}</small>
+                                                        {% if measurement.bmi_category and measurement.bmi_category != 'N/A' %}
+                                                            <br><small>BMI: {{ measurement.bmi_category }}</small>
+                                                        {% endif %}
                                                     </a>
                                                 {% endfor %}
                                             </div>
@@ -95,23 +137,20 @@
         <hr>
 
         <h2>Blood Pressure Chart</h2>
-        {# NEW: Wrap canvas in a container with controlled dimensions #}
         <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
             <canvas id="bloodPressureChart"></canvas>
         </div>
+
     </div>
 {% endblock %}
 
 {% block extra_js %}
-    {# 1. Load Chart.js library #}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    {# 2. Your chart initialization code #}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('bloodPressureChart');
 
-            if (ctx) { // Ensure the canvas element exists
+            if (ctx) {
                 fetch('{% url "measurements:blood_pressure_data" %}')
                     .then(response => {
                         if (!response.ok) {
@@ -121,16 +160,16 @@
                     })
                     .then(data => {
                         new Chart(ctx, {
-                            type: 'line', // Line chart for trends
+                            type: 'line',
                             data: {
-                                labels: data.labels, // Dates/times from your Django view
+                                labels: data.labels,
                                 datasets: [
                                     {
                                         label: 'Systolic (mmHg)',
                                         data: data.systolic,
                                         borderColor: 'rgb(75, 192, 192)',
                                         tension: 0.1,
-                                        fill: false // Do not fill area under the line
+                                        fill: false
                                     },
                                     {
                                         label: 'Diastolic (mmHg)',
@@ -150,10 +189,10 @@
                             },
                             options: {
                                 responsive: true,
-                                maintainAspectRatio: false, // Allows you to control size with CSS
+                                maintainAspectRatio: false,
                                 scales: {
                                     y: {
-                                        beginAtZero: false, // Blood pressure usually not zero
+                                        beginAtZero: false,
                                         title: {
                                             display: true,
                                             text: 'Reading'
@@ -181,8 +220,7 @@
                     })
                     .catch(error => {
                         console.error('Error fetching blood pressure data:', error);
-                        // Optionally display a message to the user here
-                        const chartContainer = document.querySelector('.chart-container'); // Or adjust selector
+                        const chartContainer = document.querySelector('.chart-container');
                         if (chartContainer) {
                             chartContainer.innerHTML = '<p class="text-danger">Could not load chart data. Please try again later.</p>';
                         }

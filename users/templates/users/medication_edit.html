@@ -1,0 +1,55 @@
+{# D:\blood_pressure\blood_pressure_python_2\users\templates\users\medication_edit.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% translate "Edit Medication" %}: {{ medication.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{% translate "Edit Medication" %}: {{ medication.name }}</h1>
+
+    {# Display Django Messages (success, error, info) #}
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>{% translate "Medication Details" %}</h4>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}<br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <button type="submit" class="btn btn-primary">{% translate "Save Changes" %}</button>
+                <a href="{% url 'users:medication_manage' %}" class="btn btn-secondary">{% translate "Cancel" %}</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

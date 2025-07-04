@@ -31,6 +31,9 @@
                             {# 'add_measurement' is in the 'measurements' app which doesn't have an app_name, so this is okay if no namespace is set for 'measurements' #}
                             <a class="nav-link" href="{% url 'measurements:add_measurement' %}">Add Measurement</a>
                         </li>
+                          <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:medication_manage' %}">Medications</a>
+                </li>
                     {% endif %}
                 </ul>
                 <ul class="navbar-nav">

@@ -2,7 +2,8 @@
 
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UserChangeForm # Import UserChangeForm for CustomUserChangeForm
-from .models import CustomUser
+from .models import CustomUser, Medication # Make sure to import Medication
+from django.utils.translation import gettext_lazy as _
 
 class CustomUserCreationForm(UserCreationForm):
     # These fields are required for initial signup based on your request.
@@ -74,3 +75,28 @@ class UserProfileUpdateForm(forms.ModelForm):
 class CustomAuthenticationForm(AuthenticationForm):
     # This form is for logging in, where username is changed to email
     username = forms.EmailField(label="Email") # Change 'username' label to 'Email'
+
+# --- NEW MEDICATION FORM START HERE ---
+class MedicationForm(forms.ModelForm):
+    class Meta:
+        model = Medication
+        fields = [
+            'name', 'dosage', 'frequency', 'start_date', 'end_date',
+            'is_active', 'notes'
+        ]
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'end_date': forms.DateInput(attrs={'type': 'date'}),
+            'notes': forms.Textarea(attrs={'rows': 3}), # Smaller text area for notes
+        }
+        labels = {
+            'name': _('Medication Name'),
+            'dosage': _('Dosage'),
+            'frequency': _('Frequency'),
+            'start_date': _('Start Date'),
+            'end_date': _('End Date'),
+            'is_active': _('Currently Active'),
+            'notes': _('Additional Notes'),
+        }
+
+# --- NEW MEDICATION FORM END HERE ---

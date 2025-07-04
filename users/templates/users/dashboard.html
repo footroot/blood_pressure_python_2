@@ -2,47 +2,100 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load measurement_filters %}
+{% load i18n %} {# Added for translation if needed for medication section #}
 
-{% block title %}Your Dashboard - BP Tracker{% endblock %}
+{% block title %}{% translate "Your Dashboard - BP Tracker" %}{% endblock %}
 
 {% block content %}
     <div class="container mt-4">
         {# UPDATED WELCOME MESSAGE AND PROFILE DISPLAY #}
-        <h1>Welcome to Your Dashboard, {{ user.get_full_name_display }}!</h1>
-        <p>This is your personalized blood pressure tracking dashboard.</p>
+        <h1>{% translate "Welcome to Your Dashboard," %} {{ user.get_full_name_display }}!</h1>
+        <p>{% translate "This is your personalized blood pressure tracking dashboard." %}</p>
         
-        {# Profile Picture and Info #}
-        <div class="mb-4 d-flex align-items-center">
-            {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;">
-            {% else %}
-                {# Provide a path to a default profile picture in your static files #}
-                <img src="{% static 'users/profile_pics/default_profile.png' %}" alt="Default Profile" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;">
-            {% endif %}
-            <div>
-                <p class="mb-0">Full Name: **{{ user.first_name|default:'N/A' }} {{ user.last_name|default:'N/A' }}**</p>
-                <p class="mb-0">Email: {{ user.email }}</p>
-                <p class="mb-0">Mobile: {{ user.phone_mobile|default:'N/A' }}</p>
-                <p class="mb-0">Address: {{ user.address|default:'N/A' }}</p>
-                <a href="{% url 'users:profile_edit' %}" class="btn btn-sm btn-outline-primary mt-2">Edit Profile</a>
+        {# Profile Picture, Info, AND Medications - Using Bootstrap Grid for side-by-side layout #}
+        <div class="row mb-4">
+            {# Column for Profile Picture and Info #}
+            <div class="col-md-6">
+                <div class="card h-100"> {# Use h-100 to make cards same height #}
+                    <div class="card-header">
+                        <h4>{% translate "Your Profile" %}</h4>
+                    </div>
+                    <div class="card-body d-flex align-items-center">
+                        {% if user.profile_picture %}
+                            <img src="{{ user.profile_picture.url }}" alt="{% translate 'Profile Picture' %}" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                            <img src="{% static 'users/profile_pics/default_profile.png' %}" alt="{% translate 'Default Profile' %}" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        {% endif %}
+                        <div>
+                            <p class="mb-0"><strong>{% translate "Full Name" %}:</strong> {{ user.first_name|default:'N/A' }} {{ user.last_name|default:'N/A' }}</p>
+                            <p class="mb-0"><strong>{% translate "Email" %}:</strong> {{ user.email }}</p>
+                            <p class="mb-0"><strong>{% translate "Mobile" %}:</strong> {{ user.phone_mobile|default:'N/A' }}</p>
+                            <p class="mb-0"><strong>{% translate "Address" %}:</strong> {{ user.address|default:'N/A' }}</p>
+                            <a href="{% url 'users:profile_edit' %}" class="btn btn-sm btn-outline-primary mt-2">{% translate "Edit Profile" %}</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            {# Column for Medications #}
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4>{% translate "Your Medications" %}</h4>
+                        <a href="{% url 'users:medication_manage' %}" class="btn btn-sm btn-outline-secondary">{% translate "Manage All" %}</a>
+                    </div>
+                    <div class="card-body">
+                        {% if dashboard_medications %}
+                            <ul class="list-group list-group-flush">
+                                {% for medication in dashboard_medications %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center {% if not medication.is_active %}list-group-item-secondary{% endif %}">
+                                        <div>
+                                            <strong>{{ medication.name }}</strong> ({{ medication.dosage|default:"-" }})
+                                            <small class="d-block text-muted">{{ medication.frequency|default:"-" }}</small>
+                                        </div>
+                                        <div>
+                                            {% if medication.is_active %}
+                                                <span class="badge bg-success">{% translate "Active" %}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{% translate "Inactive" %}</span>
+                                            {% endif %}
+                                            <a href="{% url 'users:medication_edit' medication.pk %}" class="btn btn-sm btn-info ms-2" title="{% translate 'Edit Medication' %}">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                                {# Optional: Link to show more if there are more than 5 medications #}
+                                {% if dashboard_medications.count >= 5 %}
+                                    <li class="list-group-item text-center">
+                                        <a href="{% url 'users:medication_manage' %}" class="btn btn-link">{% translate "View all medications" %}</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        {% else %}
+                            <p class="card-text">{% translate "No medications added yet." %} <a href="{% url 'users:medication_manage' %}">{% translate "Add your first one!" %}</a></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div> {# End of row for Profile and Medications #}
+
         <hr>
 
         {# Recent Blood Pressure Readings Table #}
-        <h2>Recent Blood Pressure Readings</h2>
+        <h2>{% translate "Recent Blood Pressure Readings" %}</h2>
         {% if recent_measurements %}
             <div class="table-responsive mb-5">
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Date & Time</th>
-                            <th>Systolic</th>
-                            <th>Diastolic</th>
-                            <th>Pulse</th>
-                            <th>Notes</th>
-                            <th>BP Category</th>
-                            <th>Actions</th>
+                            <th>{% translate "Date & Time" %}</th>
+                            <th>{% translate "Systolic" %}</th>
+                            <th>{% translate "Diastolic" %}</th>
+                            <th>{% translate "Pulse" %}</th>
+                            <th>{% translate "Notes" %}</th>
+                            <th>{% translate "BP Category" %}</th>
+                            <th>{% translate "Actions" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,8 +108,8 @@
                             <td>{{ measurement.notes|default_if_none:"-" }}</td>
                             <td>{{ measurement.bp_category }}</td>
                             <td>
-                                <a href="{% url 'measurements:edit_measurement' measurement.pk %}" class="btn btn-sm btn-info">Edit</a>
-                                <a href="{% url 'measurements:delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                <a href="{% url 'measurements:edit_measurement' measurement.pk %}" class="btn btn-sm btn-info">{% translate "Edit" %}</a>
+                                <a href="{% url 'measurements:delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger">{% translate "Delete" %}</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -65,17 +118,17 @@
             </div>
 
             {# Recent Body Metrics Table #}
-            <h2>Recent Weight & BMI</h2>
+            <h2>{% translate "Recent Weight & BMI" %}</h2>
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Date & Time</th>
-                            <th>Weight</th>
-                            <th>Height</th>
-                            <th>BMI</th>
-                            <th>BMI Category</th>
-                            <th>Actions</th>
+                            <th>{% translate "Date & Time" %}</th>
+                            <th>{% translate "Weight" %}</th>
+                            <th>{% translate "Height" %}</th>
+                            <th>{% translate "BMI" %}</th>
+                            <th>{% translate "BMI Category" %}</th>
+                            <th>{% translate "Actions" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -87,8 +140,8 @@
                             <td>{{ measurement.bmi|default_if_none:"-" }}</td>
                             <td>{{ measurement.bmi_category }}</td>
                             <td>
-                                <a href="{% url 'measurements:edit_measurement' measurement.pk %}" class="btn btn-sm btn-info">Edit</a>
-                                <a href="{% url 'measurements:delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                                <a href="{% url 'measurements:edit_measurement' measurement.pk %}" class="btn btn-sm btn-info">{% translate "Edit" %}</a>
+                                <a href="{% url 'measurements:delete_measurement' measurement.pk %}" class="btn btn-sm btn-danger">{% translate "Delete" %}</a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -96,15 +149,15 @@
                 </table>
             </div>
 
-            <a href="{% url 'measurements:measurement_list' %}" class="btn btn-primary mt-4">View All Measurements</a>
+            <a href="{% url 'measurements:measurement_list' %}" class="btn btn-primary mt-4">{% translate "View All Measurements" %}</a>
         {% else %}
-            <p>No measurements recorded yet. <a href="{% url 'measurements:add_measurement' %}">Add your first measurement!</a></p>
+            <p>{% translate "No measurements recorded yet." %} <a href="{% url 'measurements:add_measurement' %}">{% translate "Add your first measurement!" %}</a></p>
         {% endif %}
 
         <hr>
 
-        <h2>Calendar View</h2>
-        <p><a href="{% url 'measurements:calendar_view' %}" class="btn btn-secondary">View Full Calendar</a></p>
+        <h2>{% translate "Calendar View" %}</h2>
+        <p><a href="{% url 'measurements:calendar_view' %}" class="btn btn-secondary">{% translate "View Full Calendar" %}</a></p>
 
         <div class="table-responsive">
             <table class="table table-bordered calendar-table">
@@ -150,12 +203,12 @@
                 </tbody>
             </table>
         </div>
-        <p class="text-center mt-3">Days with measurements are highlighted. Today is highlighted.</p>
+        <p class="text-center mt-3">{% translate "Days with measurements are highlighted. Today is highlighted." %}</p>
 
 
         <hr>
 
-        <h2>Blood Pressure Chart</h2>
+        <h2>{% translate "Blood Pressure Chart" %}</h2>
         <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
             <canvas id="bloodPressureChart"></canvas>
         </div>

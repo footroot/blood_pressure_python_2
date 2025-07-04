@@ -3,6 +3,7 @@
 from django.urls import path, re_path, include
 from django.contrib.auth import views as auth_views
 from . import views
+from .forms import CustomAuthenticationForm # This import is here, though not directly used in this urls.py for LoginView
 
 app_name = "users"
 
@@ -31,4 +32,10 @@ urlpatterns = [
     # -----------------------------
     # Include Django's default authentication URLs for password reset, etc.
     path("", include("django.contrib.auth.urls")),
+
+    # Medication management URLs
+    path('medications/', views.medication_manage, name='medication_manage'),
+    # --- ADDED THIS MISSING LINE FOR MEDICATION DELETE ---
+    path('medications/delete/<int:pk>/', views.medication_delete, name='medication_delete'),
+    path('medications/edit/<int:pk>/', views.medication_edit, name='medication_edit'),
 ]
